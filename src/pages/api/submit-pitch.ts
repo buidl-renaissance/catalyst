@@ -2,40 +2,68 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '@/db';
 import { pitches } from '@/db/schema';
 import { validateTags } from '@/lib/tags';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Function to extract quote using AI
 async function extractQuote(transcript: string): Promise<string> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/extract-quote`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ transcript }),
+    const quoteExtractionPrompt = `
+You are an expert at identifying the most compelling and quotable moments from pitch transcripts.
+
+Analyze this pitch transcript and extract the most impactful, memorable quote that captures the essence of the idea. This quote should be:
+- Inspiring and thought-provoking
+- 50-150 characters long
+- Something that would make people want to learn more
+- Representative of the core value proposition
+
+Pitch transcript:
+"${transcript}"
+
+Extract the most compelling quote that would work well in a pitch card or marketing material. If the transcript doesn't contain a strong quote, create one that captures the essence of the idea.
+
+Respond with just the quote, no additional text or formatting.
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert at identifying compelling quotes from business pitches. Always respond with just the quote, no additional text.'
+        },
+        {
+          role: 'user',
+          content: quoteExtractionPrompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 200,
     });
 
-    const data = await response.json();
+    const extractedQuote = completion.choices[0]?.message?.content?.trim();
     
-    if (data.success && data.quote) {
-      return data.quote;
+    if (!extractedQuote) {
+      throw new Error('No quote extracted');
     }
+
+    // Clean up the quote - remove quotes if present and trim
+    let cleanQuote = extractedQuote.replace(/^["']|["']$/g, '').trim();
     
-    // Fallback: use first sentence of transcript
-    const sentences = transcript.split(/[.!?]/);
-    const firstSentence = sentences[0]?.trim();
-    
-    if (firstSentence && firstSentence.length > 20 && firstSentence.length < 150) {
-      return firstSentence;
+    // If the quote is too long, truncate it
+    if (cleanQuote.length > 150) {
+      cleanQuote = cleanQuote.substring(0, 147) + '...';
     }
-    
-    return transcript.length > 100 
-      ? transcript.substring(0, 97) + '...'
-      : transcript;
-      
+
+    return cleanQuote;
+
   } catch (error) {
-    console.error('Error extracting quote:', error);
+    console.error('Error in quote extraction:', error);
     
-    // Fallback: use first sentence of transcript
+    // Fallback: use the first sentence or a portion of the transcript
     const sentences = transcript.split(/[.!?]/);
     const firstSentence = sentences[0]?.trim();
     
@@ -43,6 +71,7 @@ async function extractQuote(transcript: string): Promise<string> {
       return firstSentence;
     }
     
+    // If no good sentence found, create a generic quote
     return transcript.length > 100 
       ? transcript.substring(0, 97) + '...'
       : transcript;
@@ -69,7 +98,23 @@ export default async function handler(
     }
 
     // Extract quote using AI
-    const quote = await extractQuote(transcript.trim());
+    let quote = '';
+    try {
+      quote = await extractQuote(transcript.trim());
+    } catch (error) {
+      console.error('Error extracting quote:', error);
+      // Fallback: use first sentence of transcript
+      const sentences = transcript.split(/[.!?]/);
+      const firstSentence = sentences[0]?.trim();
+      
+      if (firstSentence && firstSentence.length > 20 && firstSentence.length < 150) {
+        quote = firstSentence;
+      } else {
+        quote = transcript.length > 100 
+          ? transcript.substring(0, 97) + '...'
+          : transcript;
+      }
+    }
 
     // Validate and clean tags
     const validatedTags = tags && tags.length > 0 ? validateTags(tags) : [];

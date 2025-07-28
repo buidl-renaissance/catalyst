@@ -54,7 +54,8 @@ You are an AI assistant specialized in analyzing pitch transcripts and creating 
 Analyze this pitch transcript and generate:
 1. A catchy, professional title (max 60 characters)
 2. A compelling summary that would attract collaborators and investors (100-200 words)
-3. 3-5 relevant tags/categories
+3. A memorable quote (50-150 characters) that captures the essence of the idea
+4. 3-5 relevant tags/categories
 
 Pitch transcript:
 "${content}"
@@ -62,6 +63,7 @@ Pitch transcript:
 Guidelines:
 - Title should be engaging, clear, and professional
 - Summary should highlight the problem, solution, and value proposition
+- Quote should be inspiring and thought-provoking, capturing the core value proposition
 - Choose tags from this standardized list when applicable:
   * 🌱 CleanTech (for environmental/sustainability tech)
   * 🎮 Gaming (for gaming/entertainment)
@@ -79,6 +81,7 @@ Respond in JSON format:
 {
   "title": "Engaging pitch title",
   "summary": "Compelling summary that highlights key points and value proposition",
+  "quote": "Inspiring quote that captures the essence",
   "tags": ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5"]
 }
 `;
@@ -119,6 +122,9 @@ Respond in JSON format:
         summary: content.length > 200 
           ? content.substring(0, 197) + '...' 
           : content,
+        quote: content.length > 100 
+          ? content.substring(0, 97) + '...' 
+          : content,
         tags: ['🤖 AI/ML', '💸 Needs Funding', 'Innovation']
       };
     }
@@ -127,9 +133,10 @@ Respond in JSON format:
     const suggestions = {
       title: parsedResult.title?.substring(0, 60) || 'Untitled Pitch',
       summary: parsedResult.summary?.substring(0, 500) || content.substring(0, 200),
+      quote: parsedResult.quote?.substring(0, 150) || content.substring(0, 100),
       tags: Array.isArray(parsedResult.tags) 
         ? parsedResult.tags.slice(0, 5) 
-        : ['Innovation', 'Startup']
+        : ['🤖 AI/ML', '💸 Needs Funding', 'Innovation']
     };
 
     return res.status(200).json({
@@ -148,6 +155,9 @@ Respond in JSON format:
         : 'Innovative Business Idea',
       summary: content.length > 200 
         ? content.substring(0, 197) + '...' 
+        : content,
+      quote: content.length > 100 
+        ? content.substring(0, 97) + '...' 
         : content,
       tags: ['🤖 AI/ML', '💸 Needs Funding', 'Innovation']
     };

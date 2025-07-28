@@ -1,0 +1,1 @@
+ALTER TABLE `pitches` ADD `quote` text;

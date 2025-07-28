@@ -113,100 +113,37 @@ const FiltersSection = styled.div`
 
 const FiltersRow = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 12px;
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 20px;
   
   @media (max-width: 768px) {
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 15px;
   }
   
   @media (max-width: 480px) {
-    gap: 12px;
-    margin-bottom: 12px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  min-width: 300px;
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-  
-  &::placeholder {
-    color: #a0aec0;
-  }
-  
-  @media (max-width: 768px) {
-    min-width: 100%;
-    font-size: 16px; /* Prevents zoom on iOS */
-    margin-bottom: 10px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 14px 16px;
-    min-height: 44px;
-    font-size: 16px;
-  }
-`;
-
-const FilterSelect = styled.select`
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 1rem;
-  background: white;
-  cursor: pointer;
-  
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 16px; /* Prevents zoom on iOS */
-    width: 100%;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 14px 16px;
-    min-height: 44px;
-    font-size: 16px;
-  }
-`;
-
-const TagsRow = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  
-  @media (max-width: 768px) {
     gap: 8px;
+    margin-bottom: 12px;
   }
 `;
+
+
+
+
 
 const FilterTag = styled.button<{ active?: boolean }>`
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: 2px solid ${props => props.active ? '#667eea' : '#e2e8f0'};
   background: ${props => props.active ? '#667eea' : 'white'};
   color: ${props => props.active ? 'white' : '#4a5568'};
-  border-radius: 20px;
-  font-size: 0.9rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
   
   &:hover {
     border-color: #667eea;
@@ -218,15 +155,15 @@ const FilterTag = styled.button<{ active?: boolean }>`
   }
   
   @media (max-width: 768px) {
-    padding: 10px 16px;
-    font-size: 0.85rem;
-    min-height: 44px; /* Better touch target */
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    min-height: 36px;
   }
   
   @media (max-width: 480px) {
-    padding: 12px 14px;
-    font-size: 0.8rem;
-    min-height: 40px;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    min-height: 32px;
   }
 `;
 
@@ -582,8 +519,19 @@ export default function Explore() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get all unique tags from pitches and combine with standard tags
-  const allTags = getAllTags(pitches.flatMap(pitch => pitch.tags || []));
+  // Get only tags that exist in the fetched pitches
+  const existingTags = pitches.flatMap(pitch => pitch.tags || []);
+  const uniqueExistingTags = [...new Set(existingTags)];
+  const allTags = uniqueExistingTags.sort((a, b) => {
+    // Sort standard tags first, then custom tags
+    const aIsStandard = isStandardTag(a);
+    const bIsStandard = isStandardTag(b);
+    
+    if (aIsStandard && !bIsStandard) return -1;
+    if (!aIsStandard && bIsStandard) return 1;
+    
+    return a.localeCompare(b);
+  });
 
   // Fetch pitches from API
   useEffect(() => {
@@ -658,7 +606,7 @@ export default function Explore() {
 
             {/* Filters */}
             <FiltersSection>
-              <TagsRow>
+              <FiltersRow>
                 {allTags.map(tag => (
                   <FilterTag
                     key={tag}
@@ -672,7 +620,7 @@ export default function Explore() {
                     {tag}
                   </FilterTag>
                 ))}
-              </TagsRow>
+              </FiltersRow>
             </FiltersSection>
 
             {/* Results Header */}

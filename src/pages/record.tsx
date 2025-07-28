@@ -600,6 +600,7 @@ const StatusMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
 interface AISuggestions {
   title: string;
   summary: string;
+  quote: string;
   tags: string[];
 }
 
@@ -656,6 +657,7 @@ export default function Record() {
         setAISuggestions({
           title: data.suggestions.title,
           summary: data.suggestions.summary,
+          quote: data.suggestions.quote,
           tags: data.suggestions.tags
         });
         
