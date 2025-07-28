@@ -1,0 +1,632 @@
+import Head from "next/head";
+import Link from "next/link";
+import { useState } from "react";
+import styled, { createGlobalStyle } from "styled-components";
+import { Geist } from "next/font/google";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const GlobalStyle = createGlobalStyle`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    font-family: ${geistSans.style.fontFamily}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f8fafc;
+  }
+`;
+
+// Layout Components
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+// Header
+const Header = styled.header`
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+`;
+
+const Nav = styled.nav`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const Logo = styled(Link)`
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #667eea;
+  text-decoration: none;
+  
+  &:hover {
+    color: #764ba2;
+  }
+`;
+
+const NavLinks = styled.div`
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    gap: 20px;
+  }
+`;
+
+const NavLink = styled(Link)`
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: #667eea;
+  }
+`;
+
+const RecordButton = styled.button`
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  
+  &:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+  }
+`;
+
+// Main Content
+const Main = styled.main`
+  padding: 40px 0 80px;
+`;
+
+const PageHeader = styled.div`
+  text-align: center;
+  margin-bottom: 40px;
+`;
+
+const PageTitle = styled.h1`
+  font-size: 2.5rem;
+  color: #2d3748;
+  margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const PageSubtitle = styled.p`
+  font-size: 1.1rem;
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+// Filters Section
+const FiltersSection = styled.div`
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 40px;
+`;
+
+const FiltersRow = styled.div`
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  min-width: 300px;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+  
+  &::placeholder {
+    color: #a0aec0;
+  }
+`;
+
+const FilterSelect = styled.select`
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+`;
+
+const TagsRow = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+const FilterTag = styled.button<{ active?: boolean }>`
+  padding: 8px 16px;
+  border: 2px solid ${props => props.active ? '#667eea' : '#e2e8f0'};
+  background: ${props => props.active ? '#667eea' : 'white'};
+  color: ${props => props.active ? 'white' : '#4a5568'};
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #667eea;
+    background: ${props => props.active ? '#5a67d8' : '#f7fafc'};
+  }
+`;
+
+// Results Section
+const ResultsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+const ResultsCount = styled.p`
+  color: #718096;
+  font-size: 1rem;
+`;
+
+const SortSelect = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+`;
+
+// Pitch Grid
+const PitchGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+`;
+
+const PitchCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+  }
+`;
+
+const PitchHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+`;
+
+const Avatar = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.2rem;
+`;
+
+const PitchMeta = styled.div`
+  flex: 1;
+`;
+
+const CreatorName = styled.h3`
+  font-size: 1.1rem;
+  color: #2d3748;
+  margin-bottom: 4px;
+`;
+
+const PitchTitle = styled.h4`
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 500;
+`;
+
+const AudioButton = styled.button`
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+  }
+`;
+
+const PitchQuote = styled.p`
+  font-style: italic;
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 1.05rem;
+`;
+
+const PitchSummary = styled.p`
+  color: #718096;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+`;
+
+const Tag = styled.span`
+  background: #f7fafc;
+  color: #4a5568;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+`;
+
+const PitchFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CatalystButton = styled.button`
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #ff5252;
+    transform: scale(1.05);
+  }
+`;
+
+const TimeStamp = styled.span`
+  color: #a0aec0;
+  font-size: 0.85rem;
+`;
+
+// Pagination
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 60px;
+`;
+
+const PageButton = styled.button<{ active?: boolean }>`
+  width: 40px;
+  height: 40px;
+  border: 2px solid ${props => props.active ? '#667eea' : '#e2e8f0'};
+  background: ${props => props.active ? '#667eea' : 'white'};
+  color: ${props => props.active ? 'white' : '#4a5568'};
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #667eea;
+    background: ${props => props.active ? '#5a67d8' : '#f7fafc'};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+// Sample data
+const samplePitches = [
+  {
+    id: 1,
+    creator: "Mercedes P.",
+    title: "Culture Energy",
+    avatar: "MP",
+    quote: "What if clean energy infrastructure was led by Black-owned businesses and built into everyday community life—like barbershops and salons?",
+    summary: "Mercedes is working on a decentralized clean energy brand rooted in community-owned infrastructure and culture. She's looking for storytellers, hardware engineers, and grant partners.",
+    tags: ["🌱 CleanTech", "🏘 Community", "💸 Needs Funding"],
+    timestamp: "2 hours ago",
+    category: "cleantech"
+  },
+  {
+    id: 2,
+    creator: "Alex K.",
+    title: "Mindful Gaming",
+    avatar: "AK",
+    quote: "Gaming for mental health—what if we could measure stress reduction through play and create therapeutic game experiences?",
+    summary: "Alex is developing games that promote mindfulness and track mental health metrics. Looking for psychology researchers and Unity developers.",
+    tags: ["🎮 Gaming", "🧠 Mental Health", "🔥 Needs Dev"],
+    timestamp: "4 hours ago",
+    category: "gaming"
+  },
+  {
+    id: 3,
+    creator: "Sara L.",
+    title: "Local Art Marketplace",
+    avatar: "SL",
+    quote: "Connecting local artists directly with their communities through an AR-enabled street art discovery app.",
+    summary: "Sara wants to help local artists monetize their work through augmented reality experiences. Seeking AR developers and community organizers.",
+    tags: ["🎨 Art", "📱 AR/VR", "🎨 Needs Design"],
+    timestamp: "6 hours ago",
+    category: "art"
+  },
+  {
+    id: 4,
+    creator: "Jamie R.",
+    title: "Sustainable Fashion AI",
+    avatar: "JR",
+    quote: "Using AI to help consumers make sustainable fashion choices by analyzing fabric lifecycle and ethical production.",
+    summary: "Jamie is building an AI platform that rates clothing items on sustainability metrics. Looking for ML engineers and fashion industry connections.",
+    tags: ["👕 Fashion", "🤖 AI/ML", "🌍 Sustainability"],
+    timestamp: "8 hours ago",
+    category: "ai"
+  },
+  {
+    id: 5,
+    creator: "Morgan T.",
+    title: "Community Learning Pods",
+    avatar: "MT",
+    quote: "Creating micro-schools in neighborhoods where kids learn through project-based collaboration with local experts.",
+    summary: "Morgan is developing a network of community-based learning environments. Seeking educators, community organizers, and curriculum designers.",
+    tags: ["📚 Education", "👥 Community", "🏠 Local"],
+    timestamp: "10 hours ago",
+    category: "education"
+  },
+  {
+    id: 6,
+    creator: "David C.",
+    title: "Ocean Plastic Solutions",
+    avatar: "DC",
+    quote: "Converting ocean plastic waste into affordable building materials for coastal communities.",
+    summary: "David is working on scalable technology to transform plastic pollution into construction resources. Looking for material scientists and environmental engineers.",
+    tags: ["🌊 Ocean", "♻️ Recycling", "🏗 Construction"],
+    timestamp: "12 hours ago",
+    category: "environment"
+  }
+];
+
+const categories = ["all", "cleantech", "gaming", "art", "ai", "education", "environment"];
+const needs = ["all", "funding", "development", "design", "research", "marketing"];
+
+export default function Explore() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedNeed, setSelectedNeed] = useState("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const allTags = ["🌱 CleanTech", "🎮 Gaming", "🎨 Art", "🤖 AI/ML", "📚 Education", "🌊 Ocean", "💸 Needs Funding", "🔥 Needs Dev", "🎨 Needs Design"];
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  // Filter pitches based on current filters
+  const filteredPitches = samplePitches.filter(pitch => {
+    const matchesSearch = pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         pitch.creator.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         pitch.summary.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === "all" || pitch.category === selectedCategory;
+    
+    const matchesTags = selectedTags.length === 0 || 
+                       selectedTags.some(tag => pitch.tags.includes(tag));
+    
+    return matchesSearch && matchesCategory && matchesTags;
+  });
+
+  return (
+    <>
+      <Head>
+        <title>Explore Pitches - Be the Catalyst</title>
+        <meta name="description" content="Discover bold ideas and creative collaborations. Find your next project or team." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      
+      <GlobalStyle />
+      
+      <div className={geistSans.variable}>
+        {/* Header */}
+        <Header>
+          <Container>
+            <Nav>
+              <Logo href="/">⚡️ Catalyst</Logo>
+              <NavLinks>
+                <NavLink href="/">Home</NavLink>
+                <NavLink href="/explore">Explore</NavLink>
+                <NavLink href="/about">About</NavLink>
+                <RecordButton as="a" href="/record">🎤 Record Pitch</RecordButton>
+              </NavLinks>
+            </Nav>
+          </Container>
+        </Header>
+
+        {/* Main Content */}
+        <Main>
+          <Container>
+            {/* Page Header */}
+            <PageHeader>
+              <PageTitle>Explore Pitches</PageTitle>
+              <PageSubtitle>
+                Discover bold ideas, connect with creators, and spark your next collaboration
+              </PageSubtitle>
+            </PageHeader>
+
+            {/* Filters */}
+            <FiltersSection>
+              <FiltersRow>
+                <SearchInput
+                  type="text"
+                  placeholder="Search pitches, creators, or keywords..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <FilterSelect
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="all">All Categories</option>
+                  <option value="cleantech">CleanTech</option>
+                  <option value="gaming">Gaming</option>
+                  <option value="art">Art & Design</option>
+                  <option value="ai">AI & ML</option>
+                  <option value="education">Education</option>
+                  <option value="environment">Environment</option>
+                </FilterSelect>
+                <FilterSelect
+                  value={selectedNeed}
+                  onChange={(e) => setSelectedNeed(e.target.value)}
+                >
+                  <option value="all">All Needs</option>
+                  <option value="funding">Needs Funding</option>
+                  <option value="development">Needs Development</option>
+                  <option value="design">Needs Design</option>
+                  <option value="research">Needs Research</option>
+                  <option value="marketing">Needs Marketing</option>
+                </FilterSelect>
+              </FiltersRow>
+              
+              <TagsRow>
+                {allTags.map(tag => (
+                  <FilterTag
+                    key={tag}
+                    active={selectedTags.includes(tag)}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </FilterTag>
+                ))}
+              </TagsRow>
+            </FiltersSection>
+
+            {/* Results Header */}
+            <ResultsHeader>
+              <ResultsCount>
+                {filteredPitches.length} pitches found
+              </ResultsCount>
+              <SortSelect
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="recent">Most Recent</option>
+                <option value="popular">Most Popular</option>
+                <option value="trending">Trending</option>
+              </SortSelect>
+            </ResultsHeader>
+
+            {/* Pitch Grid */}
+            <PitchGrid>
+              {filteredPitches.map(pitch => (
+                <PitchCard key={pitch.id}>
+                  <PitchHeader>
+                    <Avatar>{pitch.avatar}</Avatar>
+                    <PitchMeta>
+                      <CreatorName>{pitch.creator}</CreatorName>
+                      <PitchTitle>{pitch.title}</PitchTitle>
+                    </PitchMeta>
+                    <AudioButton>▶️</AudioButton>
+                  </PitchHeader>
+                  
+                  <PitchQuote>&quot;{pitch.quote}&quot;</PitchQuote>
+                  <PitchSummary>{pitch.summary}</PitchSummary>
+                  
+                  <TagsContainer>
+                    {pitch.tags.map(tag => (
+                      <Tag key={tag}>{tag}</Tag>
+                    ))}
+                  </TagsContainer>
+                  
+                  <PitchFooter>
+                    <TimeStamp>{pitch.timestamp}</TimeStamp>
+                    <CatalystButton>⚡️ Be the Catalyst</CatalystButton>
+                  </PitchFooter>
+                </PitchCard>
+              ))}
+            </PitchGrid>
+
+            {/* Pagination */}
+            <Pagination>
+              <PageButton disabled={currentPage === 1}>‹</PageButton>
+              <PageButton active={currentPage === 1}>1</PageButton>
+              <PageButton active={currentPage === 2}>2</PageButton>
+              <PageButton active={currentPage === 3}>3</PageButton>
+              <PageButton>›</PageButton>
+            </Pagination>
+          </Container>
+        </Main>
+      </div>
+    </>
+  );
+} 
