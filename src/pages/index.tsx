@@ -104,6 +104,18 @@ const CTAContainer = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const CTAButton = styled.button<{ variant?: 'primary' | 'secondary' | 'tertiary' }>`
@@ -148,6 +160,26 @@ const CTAButton = styled.button<{ variant?: 'primary' | 'secondary' | 'tertiary'
       transform: translateY(-2px);
     }
   `}
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 14px 24px;
+    font-size: 1rem;
+    min-height: 44px;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    min-height: 48px;
+  }
 `;
 
 const WaveformContainer = styled.div`
@@ -438,7 +470,7 @@ export default function Home() {
       <Head>
         <title>Be the Catalyst - Spark Creative Collaborations</title>
         <meta name="description" content="Listen to bold ideas. Read quick summaries. Respond to spark the next creative collaboration." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       

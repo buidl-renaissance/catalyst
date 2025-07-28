@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { Geist } from "next/font/google";
 import Transcriber from "./components/Transcriber";
+import MobileNavigation from "./components/MobileNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,82 +29,30 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 0 20px;
-`;
-
-// Header
-const Header = styled.header`
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 20px 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-`;
-
-const Logo = styled(Link)`
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #667eea;
-  text-decoration: none;
-  
-  &:hover {
-    color: #764ba2;
-  }
-`;
-
-const NavLinks = styled.div`
-  display: flex;
-  gap: 30px;
-  align-items: center;
   
   @media (max-width: 768px) {
-    gap: 20px;
+    padding: 0 16px;
   }
 `;
 
-const NavLink = styled(Link)`
-  color: #4a5568;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-  
-  &:hover {
-    color: #667eea;
-  }
-`;
-
-const ExploreButton = styled(Link)`
-  background: #667eea;
-  color: white;
-  text-decoration: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: #5a67d8;
-    transform: translateY(-1px);
-  }
-`;
+// Removed header styles - now using MobileNavigation component
 
 // Main Content
 const Main = styled.main`
   padding: 40px 0 80px;
+  
+  @media (max-width: 768px) {
+    padding: 20px 0 60px;
+  }
 `;
 
 const PageHeader = styled.div`
   text-align: center;
   margin-bottom: 40px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 30px;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -121,6 +70,11 @@ const PageSubtitle = styled.p`
   color: #718096;
   max-width: 600px;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0 10px;
+  }
 `;
 
 // Stepper
@@ -130,6 +84,12 @@ const StepperContainer = styled.div`
   padding: 30px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
 `;
 
 const StepperNav = styled.div`
@@ -137,6 +97,12 @@ const StepperNav = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
 `;
 
 const Step = styled.div<{ active?: boolean; completed?: boolean }>`
@@ -179,11 +145,21 @@ const StepCircle = styled.div<{ active?: boolean; completed?: boolean }>`
     border: 2px solid #e2e8f0;
     color: #a0aec0;
   `}
+  
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
 `;
 
 const StepLabel = styled.span<{ active?: boolean; completed?: boolean }>`
   font-weight: 600;
   color: ${props => props.active || props.completed ? '#2d3748' : '#a0aec0'};
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
 `;
 
 // Recording Section (Step 1)
@@ -199,12 +175,24 @@ const RecordingCard = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    min-height: 320px;
+  }
 `;
 
 const RecordingTitle = styled.h2`
   font-size: 1.8rem;
   color: #2d3748;
   margin-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
 `;
 
 const RecordingInstructions = styled.p`
@@ -212,6 +200,12 @@ const RecordingInstructions = styled.p`
   margin-bottom: 40px;
   font-size: 1.1rem;
   max-width: 500px;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
 `;
 
 const TranscriberContainer = styled.div`
@@ -219,6 +213,10 @@ const TranscriberContainer = styled.div`
   display: flex;
   justify-content: center;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
 `;
 
 // Transcript Display
@@ -271,6 +269,17 @@ const ContinueButton = styled.button`
     cursor: not-allowed;
     transform: none;
   }
+  
+  @media (max-width: 768px) {
+    padding: 16px 32px;
+    font-size: 1rem;
+    margin-top: 24px;
+    min-height: 48px; /* Better touch target */
+    
+    &:hover {
+      transform: none; /* Disable hover effects on mobile */
+    }
+  }
 `;
 
 // Form Section (Step 2)
@@ -280,18 +289,33 @@ const FormCard = styled.div`
   padding: 40px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
 `;
 
 const FormTitle = styled.h2`
   font-size: 1.8rem;
   color: #2d3748;
   margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const FormSubtitle = styled.p`
   color: #718096;
   margin-bottom: 30px;
   font-size: 1rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+  }
 `;
 
 const AIGeneratedLabel = styled.div`
@@ -334,6 +358,10 @@ const LoadingSpinner = styled.div`
 
 const FormGroup = styled.div`
   margin-bottom: 25px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
 `;
 
 const Label = styled.label`
@@ -342,6 +370,11 @@ const Label = styled.label`
   color: #4a5568;
   margin-bottom: 8px;
   font-size: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
 `;
 
 const Input = styled.input`
@@ -366,6 +399,12 @@ const Input = styled.input`
   
   &::placeholder {
     color: #718096;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 8px;
   }
 `;
 
@@ -394,6 +433,13 @@ const TextArea = styled.textarea`
   
   &::placeholder {
     color: #718096;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 8px;
+    min-height: 100px;
   }
 `;
 
@@ -536,6 +582,13 @@ const StatusMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
     border: 1px solid #90cdf4;
     color: #2a4365;
   `}
+  
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+  }
 `;
 
 interface AISuggestions {
@@ -670,7 +723,7 @@ export default function Record() {
       <Head>
         <title>Record Your Pitch - Be the Catalyst</title>
         <meta name="description" content="Share your bold idea with the community. Record a 60-second pitch and spark your next collaboration." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
@@ -678,17 +731,10 @@ export default function Record() {
       
       <div className={geistSans.variable}>
         {/* Header */}
-        <Header>
-          <Nav>
-            <Logo href="/">⚡️ Catalyst</Logo>
-            <NavLinks>
-              <NavLink href="/">Home</NavLink>
-              <NavLink href="/explore">Explore</NavLink>
-              <NavLink href="/about">About</NavLink>
-              <ExploreButton href="/explore">👀 Explore Pitches</ExploreButton>
-            </NavLinks>
-          </Nav>
-        </Header>
+        <MobileNavigation 
+          currentPage="/record"
+          primaryButton={{ href: '/explore', text: '👀 Explore Pitches', variant: 'secondary' }}
+        />
 
         {/* Main Content */}
         <Main>
