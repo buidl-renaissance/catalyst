@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '../../db';
-import { subscriptions } from '../../db/schema';
+import { subscriptions } from '../../../src/db/schema';
 import { sql } from 'drizzle-orm';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
