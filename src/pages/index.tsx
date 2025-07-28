@@ -21,11 +21,6 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 // Animations
-const sparkle = keyframes`
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
-`;
-
 const waveform = keyframes`
   0%, 100% { height: 20px; }
   50% { height: 40px; }
@@ -489,7 +484,7 @@ export default function Home() {
                 <StepIcon>🗣</StepIcon>
                 <StepTitle>Share Your Idea</StepTitle>
                 <StepDescription>
-                  Record a 60-second voice pitch. Tell us your idea, what you're building, or what you need help with.
+                  Record a 60-second voice pitch. Tell us your idea, what you&apos;re building, or what you need help with.
                 </StepDescription>
               </StepCard>
               
@@ -519,13 +514,13 @@ export default function Home() {
             <FeedContainer>
               <PitchCard>
                 <PitchTitle>
-                  🎧 Mercedes P. | "Culture Energy"
+                  🎧 Mercedes P. | &quot;Culture Energy&quot;
                 </PitchTitle>
                                  <PitchQuote>
                    &quot;What if clean energy infrastructure was led by Black-owned businesses and built into everyday community life—like barbershops and salons?&quot;
                  </PitchQuote>
                 <PitchSummary>
-                  Mercedes is working on a decentralized clean energy brand rooted in community-owned infrastructure and culture. She's looking for storytellers, hardware engineers, and grant partners.
+                  Mercedes is working on a decentralized clean energy brand rooted in community-owned infrastructure and culture. She&apos;s looking for storytellers, hardware engineers, and grant partners.
                 </PitchSummary>
                 <Tags>
                   <Tag>🌱 CleanTech</Tag>
@@ -537,7 +532,7 @@ export default function Home() {
               
               <PitchCard>
                 <PitchTitle>
-                  🎮 Alex K. | "Mindful Gaming"
+                  🎮 Alex K. | &quot;Mindful Gaming&quot;
                 </PitchTitle>
                                  <PitchQuote>
                    &quot;Gaming for mental health—what if we could measure stress reduction through play and create therapeutic game experiences?&quot;
@@ -555,7 +550,7 @@ export default function Home() {
               
               <PitchCard>
                 <PitchTitle>
-                  🎨 Sara L. | "Local Art Marketplace"
+                  🎨 Sara L. | &quot;Local Art Marketplace&quot;
                 </PitchTitle>
                                  <PitchQuote>
                    &quot;Connecting local artists directly with their communities through an AR-enabled street art discovery app.&quot;
@@ -577,7 +572,7 @@ export default function Home() {
         {/* Why It Matters Section */}
         <WhyItMattersSection>
           <Container>
-            <SectionTitle>Ideas die in silence. Let's build in public—together.</SectionTitle>
+            <SectionTitle>Ideas die in silence. Let&apos;s build in public—together.</SectionTitle>
             <BenefitsGrid>
               <BenefitCard>
                 <BenefitIcon>🚀</BenefitIcon>
@@ -646,7 +641,7 @@ export default function Home() {
         {/* Get Started Section */}
         <GetStartedSection>
           <Container>
-            <SectionTitle style={{ color: 'white' }}>Got an idea? You're 60 seconds away from potential.</SectionTitle>
+            <SectionTitle style={{ color: 'white' }}>Got an idea? You&apos;re 60 seconds away from potential.</SectionTitle>
             <CTAContainer>
               <CTAButton as="a" href="/record" variant="primary">
                 🎤 Record Your Pitch
