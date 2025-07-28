@@ -1,5 +1,6 @@
 import Document, { DocumentContext, Html, Head, Main, NextScript } from "next/document";
 import { ServerStyleSheet } from "styled-components";
+import { Analytics } from "@vercel/analytics/next";
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
