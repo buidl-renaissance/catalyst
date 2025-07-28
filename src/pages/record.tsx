@@ -533,6 +533,12 @@ const BackButton = styled.button`
     background: #f7fafc;
     transform: translateY(-2px);
   }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -616,6 +622,7 @@ export default function Record() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [status, setStatus] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleTranscriptReady = (newTranscript: string, newAudioUrl: string) => {
     setTranscript(newTranscript);
@@ -702,14 +709,72 @@ export default function Record() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim()) {
       setStatus({ type: 'error', message: 'Please add a title for your pitch.' });
       return;
     }
 
-    // Here you would typically upload the recording and form data
-    setStatus({ type: 'success', message: 'Pitch submitted successfully! 🎉 Your idea is now live on the platform.' });
+    if (!transcript.trim()) {
+      setStatus({ type: 'error', message: 'No transcript available. Please record your pitch first.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus({ type: 'info', message: 'Submitting your pitch...' });
+
+    try {
+      const response = await fetch('/api/submit-pitch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          transcript: transcript.trim(),
+          audioUrl: audioUrl,
+          tags: tags
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit pitch');
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setStatus({ 
+          type: 'success', 
+          message: 'Pitch submitted successfully! 🎉 Your idea is now live on the platform.' 
+        });
+        
+        // Reset form after successful submission
+        setTimeout(() => {
+          setCurrentStep(1);
+          setTranscript('');
+          setAudioUrl('');
+          setHasRecording(false);
+          setTitle('');
+          setDescription('');
+          setTags([]);
+          setAISuggestions(null);
+          setStatus(null);
+        }, 3000);
+      } else {
+        throw new Error(data.error || 'Failed to submit pitch');
+      }
+    } catch (error) {
+      console.error('Error submitting pitch:', error);
+      setStatus({ 
+        type: 'error', 
+        message: `Failed to submit pitch: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBackToRecording = () => {
@@ -882,11 +947,11 @@ export default function Record() {
                 {!isGeneratingSuggestions && (
                   <SubmitCard>
                     <ButtonGroup>
-                      <BackButton onClick={handleBackToRecording}>
+                      <BackButton onClick={handleBackToRecording} disabled={isSubmitting}>
                         ← Back to Recording
                       </BackButton>
-                      <SubmitButton onClick={handleSubmit}>
-                        🚀 Publish Your Pitch
+                      <SubmitButton onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? '📤 Publishing...' : '🚀 Publish Your Pitch'}
                       </SubmitButton>
                     </ButtonGroup>
                   </SubmitCard>
