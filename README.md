@@ -1,40 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# ⚡️ Be the Catalyst – Platform Concept
+
+*"Every idea deserves ignition. Listen. Read. Respond. Spark something real."*
+
+## 🎙 1. Creators Upload Their Pitch
+
+A 60-second voice or video snippet
+
+**Prompted with:**
+- "What are you working on?"
+- "What's your idea?"
+- "What help or energy do you need?"
+
+**Optional:** give it a title, add tags
+
+## 🧠 2. AI-Enhanced Summary
+
+System transcribes → summarizes into:
+
+🔤 **A one-paragraph pitch**
+
+💬 **A pull quote**
+
+🎯 **A clear call for collaboration** (auto-detected or added)
+
+🎧 **Optional:** Audio player
+
+## 🧪 3. Catalyst Feed
+
+A scrollable feed of ideas—quick to read, easy to hear, and designed to be acted on.
+
+**Each item shows:**
+- Title
+- Quote
+- Summary
+- Tags (idea type, needs, community area)
+- **CTA:** "⚡️ Be the Catalyst"
+
+## 💬 4. Catalyst Response Flow
+
+**When a user taps Be the Catalyst, they can:**
+- Leave voice or text feedback
+- Share an idea or resource
+- Offer to collaborate
+- Add a remix (e.g. "What if we built it like this?")
+
+**System then:**
+- Links responses to the original pitch
+- Notifies the original creator
+- Optionally starts a collaboration thread or project card
+
+## 📈 5. Trending Sparks
+
+- Most resonated-with ideas float up
+- **Visual tags:** "🔥 Needs Dev", "🎨 Needs Design", "💸 Needs Funding"
+- You can follow ideas as they evolve into projects
+
+## 💎 Why This Works
+
+- **Short-form input** = easy for creators
+- **Readable + listenable** = broad accessibility
+- **Interactive responses** = turns an idea into a team
+- **Visible momentum** = builds community
+
+## 🧪 Mock Pitch Example
+
+**🎧 Mercedes P. | "Culture Energy"**
+
+*"What if clean energy infrastructure was led by Black-owned businesses and built into everyday community life—like barbershops and salons?"*
+
+**Summary:** Mercedes is working on a decentralized clean energy brand rooted in community-owned infrastructure and culture. She's looking for storytellers, hardware engineers, and grant partners.
+
+**🔥 Be the Catalyst →**
+
+---
 
 ## Getting Started
 
-First, run the development server:
+This is a [Next.js](https://nextjs.org) project. To run the development server:
 
 ```bash
-npm run dev
-# or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
