@@ -607,9 +607,6 @@ const categories = ["all", "cleantech", "gaming", "art", "ai", "education", "env
 const needs = ["all", "funding", "development", "design", "research", "marketing"];
 
 export default function Explore() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedNeed, setSelectedNeed] = useState("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
@@ -626,16 +623,10 @@ export default function Explore() {
 
   // Filter pitches based on current filters
   const filteredPitches = samplePitches.filter(pitch => {
-    const matchesSearch = pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pitch.creator.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pitch.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "all" || pitch.category === selectedCategory;
-    
     const matchesTags = selectedTags.length === 0 || 
                        selectedTags.some(tag => pitch.tags.includes(tag));
     
-    return matchesSearch && matchesCategory && matchesTags;
+    return matchesTags;
   });
 
   return (
@@ -669,38 +660,6 @@ export default function Explore() {
 
             {/* Filters */}
             <FiltersSection>
-              <FiltersRow>
-                <SearchInput
-                  type="text"
-                  placeholder="Search pitches, creators, or keywords..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <FilterSelect
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  <option value="all">All Categories</option>
-                  <option value="cleantech">CleanTech</option>
-                  <option value="gaming">Gaming</option>
-                  <option value="art">Art & Design</option>
-                  <option value="ai">AI & ML</option>
-                  <option value="education">Education</option>
-                  <option value="environment">Environment</option>
-                </FilterSelect>
-                <FilterSelect
-                  value={selectedNeed}
-                  onChange={(e) => setSelectedNeed(e.target.value)}
-                >
-                  <option value="all">All Needs</option>
-                  <option value="funding">Needs Funding</option>
-                  <option value="development">Needs Development</option>
-                  <option value="design">Needs Design</option>
-                  <option value="research">Needs Research</option>
-                  <option value="marketing">Needs Marketing</option>
-                </FilterSelect>
-              </FiltersRow>
-              
               <TagsRow>
                 {allTags.map(tag => (
                   <FilterTag
