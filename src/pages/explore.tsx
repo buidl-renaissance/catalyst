@@ -1,14 +1,28 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { Geist } from "next/font/google";
 import MobileNavigation from "./components/MobileNavigation";
+import { STANDARD_TAGS, getAllTags, isStandardTag } from "@/lib/tags";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+interface Pitch {
+  id: number;
+  creator: string;
+  title: string;
+  avatar: string;
+  quote: string;
+  summary: string;
+  tags: string[];
+  timestamp: string;
+  audioUrl?: string;
+  transcript?: string;
+}
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -420,9 +434,9 @@ const TagsContainer = styled.div`
   }
 `;
 
-const Tag = styled.span`
-  background: #f7fafc;
-  color: #4a5568;
+const Tag = styled.span<{ isStandard?: boolean }>`
+  background: ${props => props.isStandard ? '#667eea' : '#f7fafc'};
+  color: ${props => props.isStandard ? 'white' : '#4a5568'};
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
@@ -491,6 +505,27 @@ const TimeStamp = styled.span`
   }
 `;
 
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 1.1rem;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  color: #e53e3e;
+  font-size: 1.1rem;
+`;
+
+const EmptyMessage = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 1.1rem;
+`;
+
 // Pagination
 const Pagination = styled.div`
   display: flex;
@@ -533,75 +568,8 @@ const PageButton = styled.button<{ active?: boolean }>`
   }
 `;
 
-// Sample data
-const samplePitches = [
-  {
-    id: 1,
-    creator: "Mercedes P.",
-    title: "Culture Energy",
-    avatar: "MP",
-    quote: "What if clean energy infrastructure was led by Black-owned businesses and built into everyday community life—like barbershops and salons?",
-    summary: "Mercedes is working on a decentralized clean energy brand rooted in community-owned infrastructure and culture. She's looking for storytellers, hardware engineers, and grant partners.",
-    tags: ["🌱 CleanTech", "🏘 Community", "💸 Needs Funding"],
-    timestamp: "2 hours ago",
-    category: "cleantech"
-  },
-  {
-    id: 2,
-    creator: "Alex K.",
-    title: "Mindful Gaming",
-    avatar: "AK",
-    quote: "Gaming for mental health—what if we could measure stress reduction through play and create therapeutic game experiences?",
-    summary: "Alex is developing games that promote mindfulness and track mental health metrics. Looking for psychology researchers and Unity developers.",
-    tags: ["🎮 Gaming", "🧠 Mental Health", "🔥 Needs Dev"],
-    timestamp: "4 hours ago",
-    category: "gaming"
-  },
-  {
-    id: 3,
-    creator: "Sara L.",
-    title: "Local Art Marketplace",
-    avatar: "SL",
-    quote: "Connecting local artists directly with their communities through an AR-enabled street art discovery app.",
-    summary: "Sara wants to help local artists monetize their work through augmented reality experiences. Seeking AR developers and community organizers.",
-    tags: ["🎨 Art", "📱 AR/VR", "🎨 Needs Design"],
-    timestamp: "6 hours ago",
-    category: "art"
-  },
-  {
-    id: 4,
-    creator: "Jamie R.",
-    title: "Sustainable Fashion AI",
-    avatar: "JR",
-    quote: "Using AI to help consumers make sustainable fashion choices by analyzing fabric lifecycle and ethical production.",
-    summary: "Jamie is building an AI platform that rates clothing items on sustainability metrics. Looking for ML engineers and fashion industry connections.",
-    tags: ["👕 Fashion", "🤖 AI/ML", "🌍 Sustainability"],
-    timestamp: "8 hours ago",
-    category: "ai"
-  },
-  {
-    id: 5,
-    creator: "Morgan T.",
-    title: "Community Learning Pods",
-    avatar: "MT",
-    quote: "Creating micro-schools in neighborhoods where kids learn through project-based collaboration with local experts.",
-    summary: "Morgan is developing a network of community-based learning environments. Seeking educators, community organizers, and curriculum designers.",
-    tags: ["📚 Education", "👥 Community", "🏠 Local"],
-    timestamp: "10 hours ago",
-    category: "education"
-  },
-  {
-    id: 6,
-    creator: "David C.",
-    title: "Ocean Plastic Solutions",
-    avatar: "DC",
-    quote: "Converting ocean plastic waste into affordable building materials for coastal communities.",
-    summary: "David is working on scalable technology to transform plastic pollution into construction resources. Looking for material scientists and environmental engineers.",
-    tags: ["🌊 Ocean", "♻️ Recycling", "🏗 Construction"],
-    timestamp: "12 hours ago",
-    category: "environment"
-  }
-];
+// Fallback data for when no pitches are available
+const fallbackPitches: Pitch[] = [];
 
 const categories = ["all", "cleantech", "gaming", "art", "ai", "education", "environment"];
 const needs = ["all", "funding", "development", "design", "research", "marketing"];
@@ -610,8 +578,38 @@ export default function Explore() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pitches, setPitches] = useState<Pitch[]>(fallbackPitches);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const allTags = ["🌱 CleanTech", "🎮 Gaming", "🎨 Art", "🤖 AI/ML", "📚 Education", "🌊 Ocean", "💸 Needs Funding", "🔥 Needs Dev", "🎨 Needs Design"];
+  // Get all unique tags from pitches and combine with standard tags
+  const allTags = getAllTags(pitches.flatMap(pitch => pitch.tags || []));
+
+  // Fetch pitches from API
+  useEffect(() => {
+    const fetchPitches = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/pitches');
+        const data = await response.json();
+        
+        if (data.success) {
+          setPitches(data.pitches);
+        } else {
+          setError('Failed to load pitches');
+        }
+      } catch (err) {
+        setError('Failed to load pitches');
+        console.error('Error fetching pitches:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPitches();
+  }, []);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
@@ -622,7 +620,7 @@ export default function Explore() {
   };
 
   // Filter pitches based on current filters
-  const filteredPitches = samplePitches.filter(pitch => {
+  const filteredPitches = pitches.filter((pitch: Pitch) => {
     const matchesTags = selectedTags.length === 0 || 
                        selectedTags.some(tag => pitch.tags.includes(tag));
     
@@ -666,6 +664,10 @@ export default function Explore() {
                     key={tag}
                     active={selectedTags.includes(tag)}
                     onClick={() => toggleTag(tag)}
+                    style={{
+                      borderColor: isStandardTag(tag) ? '#667eea' : '#e2e8f0',
+                      fontWeight: isStandardTag(tag) ? '600' : '500'
+                    }}
                   >
                     {tag}
                   </FilterTag>
@@ -676,11 +678,12 @@ export default function Explore() {
             {/* Results Header */}
             <ResultsHeader>
               <ResultsCount>
-                {filteredPitches.length} pitches found
+                {loading ? 'Loading...' : `${filteredPitches.length} pitches found`}
               </ResultsCount>
               <SortSelect
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
+                disabled={loading}
               >
                 <option value="recent">Most Recent</option>
                 <option value="popular">Most Popular</option>
@@ -688,44 +691,71 @@ export default function Explore() {
               </SortSelect>
             </ResultsHeader>
 
+            {/* Loading State */}
+            {loading && (
+              <LoadingMessage>
+                Loading pitches...
+              </LoadingMessage>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <ErrorMessage>
+                {error}
+              </ErrorMessage>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && filteredPitches.length === 0 && (
+              <EmptyMessage>
+                No pitches found. Be the first to record a pitch!
+              </EmptyMessage>
+            )}
+
             {/* Pitch Grid */}
-            <PitchGrid>
-              {filteredPitches.map(pitch => (
-                <PitchCard key={pitch.id}>
-                  <PitchHeader>
-                    <Avatar>{pitch.avatar}</Avatar>
-                    <PitchMeta>
-                      <CreatorName>{pitch.creator}</CreatorName>
-                      <PitchTitle>{pitch.title}</PitchTitle>
-                    </PitchMeta>
-                    <AudioButton>▶️</AudioButton>
-                  </PitchHeader>
-                  
-                  <PitchQuote>&quot;{pitch.quote}&quot;</PitchQuote>
-                  <PitchSummary>{pitch.summary}</PitchSummary>
-                  
-                  <TagsContainer>
-                    {pitch.tags.map(tag => (
-                      <Tag key={tag}>{tag}</Tag>
-                    ))}
-                  </TagsContainer>
-                  
-                  <PitchFooter>
-                    <TimeStamp>{pitch.timestamp}</TimeStamp>
-                    <CatalystButton>⚡️ Be the Catalyst</CatalystButton>
-                  </PitchFooter>
-                </PitchCard>
-              ))}
-            </PitchGrid>
+            {!loading && !error && filteredPitches.length > 0 && (
+              <PitchGrid>
+                {filteredPitches.map((pitch: Pitch) => (
+                  <PitchCard key={pitch.id}>
+                    <PitchHeader>
+                      <Avatar>{pitch.avatar}</Avatar>
+                      <PitchMeta>
+                        <CreatorName>{pitch.creator}</CreatorName>
+                        <PitchTitle>{pitch.title}</PitchTitle>
+                      </PitchMeta>
+                      <AudioButton>▶️</AudioButton>
+                    </PitchHeader>
+                    
+                    <PitchQuote>&quot;{pitch.quote}&quot;</PitchQuote>
+                    <PitchSummary>{pitch.summary}</PitchSummary>
+                    
+                    <TagsContainer>
+                      {pitch.tags.map((tag: string) => (
+                        <Tag key={tag} isStandard={isStandardTag(tag)}>
+                          {tag}
+                        </Tag>
+                      ))}
+                    </TagsContainer>
+                    
+                    <PitchFooter>
+                      <TimeStamp>{pitch.timestamp}</TimeStamp>
+                      <CatalystButton>⚡️ Be the Catalyst</CatalystButton>
+                    </PitchFooter>
+                  </PitchCard>
+                ))}
+              </PitchGrid>
+            )}
 
             {/* Pagination */}
-            <Pagination>
-              <PageButton disabled={currentPage === 1}>‹</PageButton>
-              <PageButton active={currentPage === 1}>1</PageButton>
-              <PageButton active={currentPage === 2}>2</PageButton>
-              <PageButton active={currentPage === 3}>3</PageButton>
-              <PageButton>›</PageButton>
-            </Pagination>
+            {!loading && !error && filteredPitches.length > 0 && (
+              <Pagination>
+                <PageButton disabled={currentPage === 1}>‹</PageButton>
+                <PageButton active={currentPage === 1}>1</PageButton>
+                <PageButton active={currentPage === 2}>2</PageButton>
+                <PageButton active={currentPage === 3}>3</PageButton>
+                <PageButton>›</PageButton>
+              </Pagination>
+            )}
           </Container>
         </Main>
       </div>

@@ -17,6 +17,7 @@ export const pitches = sqliteTable("pitches", {
   title: text("title").notNull(),
   description: text("description"),
   transcript: text("transcript").notNull(),
+  quote: text("quote"), // AI-extracted quote from the pitch
   audioUrl: text("audio_url"),
   tags: text("tags"), // JSON string of tags
   status: text("status").notNull().default("draft"), // draft, published, archived

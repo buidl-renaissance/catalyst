@@ -62,7 +62,17 @@ Pitch transcript:
 Guidelines:
 - Title should be engaging, clear, and professional
 - Summary should highlight the problem, solution, and value proposition
-- Tags should be relevant categories like "Tech", "AI", "Healthcare", "Sustainability", etc.
+- Choose tags from this standardized list when applicable:
+  * 🌱 CleanTech (for environmental/sustainability tech)
+  * 🎮 Gaming (for gaming/entertainment)
+  * 🎨 Art (for creative/artistic projects)
+  * 🤖 AI/ML (for artificial intelligence/machine learning)
+  * 📚 Education (for learning/educational projects)
+  * 🌊 Ocean (for marine/ocean-related projects)
+  * 💸 Needs Funding (if the pitch mentions funding needs)
+  * 🔥 Needs Dev (if the pitch mentions needing developers)
+  * 🎨 Needs Design (if the pitch mentions needing designers)
+- You can also suggest other relevant tags not in this list
 - Focus on what would appeal to potential collaborators, investors, or partners
 
 Respond in JSON format:
@@ -109,7 +119,7 @@ Respond in JSON format:
         summary: content.length > 200 
           ? content.substring(0, 197) + '...' 
           : content,
-        tags: ['Innovation', 'Startup', 'Business', 'Opportunity']
+        tags: ['🤖 AI/ML', '💸 Needs Funding', 'Innovation']
       };
     }
 
@@ -139,7 +149,7 @@ Respond in JSON format:
       summary: content.length > 200 
         ? content.substring(0, 197) + '...' 
         : content,
-      tags: ['Innovation', 'Startup', 'Business']
+      tags: ['🤖 AI/ML', '💸 Needs Funding', 'Innovation']
     };
 
     return res.status(200).json({

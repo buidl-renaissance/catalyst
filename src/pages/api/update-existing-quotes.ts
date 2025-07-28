@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '@/db';
 import { pitches } from '@/db/schema';
-import { validateTags } from '@/lib/tags';
+import { eq, isNull } from 'drizzle-orm';
 
-// Function to extract quote using AI
+// Function to extract quote using AI (same as in submit-pitch.ts)
 async function extractQuote(transcript: string): Promise<string> {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/extract-quote`, {
@@ -58,48 +58,49 @@ export default async function handler(
   }
 
   try {
-    const { title, description, transcript, audioUrl, tags } = req.body;
+    // Get all pitches that don't have quotes yet
+    const pitchesWithoutQuotes = await db
+      .select()
+      .from(pitches)
+      .where(isNull(pitches.quote));
 
-    // Validate required fields
-    if (!title || !transcript) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Title and transcript are required' 
+    if (pitchesWithoutQuotes.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'All pitches already have quotes',
+        updated: 0
       });
     }
 
-    // Extract quote using AI
-    const quote = await extractQuote(transcript.trim());
+    let updatedCount = 0;
 
-    // Validate and clean tags
-    const validatedTags = tags && tags.length > 0 ? validateTags(tags) : [];
+    // Update each pitch with an AI-extracted quote
+    for (const pitch of pitchesWithoutQuotes) {
+      try {
+        const quote = await extractQuote(pitch.transcript);
+        
+        await db
+          .update(pitches)
+          .set({ quote })
+          .where(eq(pitches.id, pitch.id));
 
-    // Insert pitch into database
-    const [pitch] = await db.insert(pitches).values({
-      title: title.trim(),
-      description: description?.trim() || '',
-      transcript: transcript.trim(),
-      quote: quote,
-      audioUrl: audioUrl || '',
-      tags: validatedTags.length > 0 ? JSON.stringify(validatedTags) : null,
-      status: 'published'
-    }).returning();
+        updatedCount++;
+      } catch (error) {
+        console.error(`Error updating pitch ${pitch.id}:`, error);
+      }
+    }
 
     return res.status(200).json({
       success: true,
-      pitch: {
-        id: pitch.id,
-        uuid: pitch.uuid,
-        title: pitch.title,
-        status: pitch.status
-      }
+      message: `Updated ${updatedCount} pitches with quotes`,
+      updated: updatedCount
     });
 
   } catch (error) {
-    console.error('Error submitting pitch:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Failed to submit pitch' 
+    console.error('Error updating existing quotes:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update existing quotes'
     });
   }
 } 
